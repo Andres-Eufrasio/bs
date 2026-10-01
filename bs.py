@@ -1,5 +1,6 @@
 import argparse
 import webbrowser
+import json
 from urllib.parse import quote
 
 
@@ -17,11 +18,18 @@ parser.add_argument(
     "-e", "--engine",
     default="google",
     help="Select a search engine",
+    type=str.lower,
 )
 
 parser.add_argument(
     "-b", "--browser",
     help="Select the browser to use - must be PATH to executable",
+)
+
+parser.add_argument(
+    "-s", "--secure_off",
+    help="use http",
+    action="store_true",
 )
 
 parser.add_argument(
@@ -58,42 +66,27 @@ class Search:
 				"ws://",
 				"wss://",
                 )):
-                self.search_string = "https://" + self.search_string
+                
+                self.search_string = f"{self.check_secure()}://{self.search_string}"
 
             return
 
         # Localhost search
         if self.args.local:
-            self.search_string = (
-                f"https://localhost:{self.args.local}/"
-                f"{quote(self.args.search)}"
-            )
+            if self.args.search == "/":
+                self.search_string = (
+                    f"{self.check_secure()}://localhost:{quote(self.args.local)}"
+                )
+            else:
+                self.search_string = (
+                    f"{self.check_secure()}://localhost:{self.args.local}/"
+                    f"{quote(self.args.search)}"
+                )
             return
 
         # Search engine
-        engines = {
-            "google": "https://www.google.com/search?q=",
-            "bing": "https://www.bing.com/search?q=",
-            "brave": "https://search.brave.com/search?q=",
-            "duckduckgo": "https://duckduckgo.com/?q=",
-			"yandex": "https://yandex.com/search/?text=",
-			"duckduckgo": "https://duckduckgo.com/?q=",
-			"baidu": "https://www.baidu.com/s?wd=",
-			"brave": "https://search.brave.com/search?q=",
-			"ecosia": "https://www.ecosia.org/search?q=",
-			"naver": "https://search.naver.com/search.naver?query=",
-			"seznam": "https://search.seznam.cz/?q=",
-			"qwant": "https://www.qwant.com/?q=",
-			"startpage": "https://www.startpage.com/sp/search?query=",
-			"swisscows": "https://swisscows.com/en/web?query=",
-			"aol": "https://search.aol.com/aol/search?q=",
-			"ask": "https://www.ask.com/web?q=",
-			"coccoc": "https://coccoc.com/search?query=",
-			"daum": "https://search.daum.net/search?q=",
-			"petal": "https://petalsearch.com/search?query=",
-			"mojeek": "https://www.mojeek.com/search?q=",
-			"you": "https://you.com/search?q=",
-        }
+        with open("./resources/engines.json", 'r') as engines_json:
+            engines = json.load(engines_json)
 
         engine_url = engines[self.args.engine]
 
@@ -107,6 +100,9 @@ class Search:
             browser.open(self.search_string)
         else:
             webbrowser.open(self.search_string)
+    # rename this to somethine better when I think of it
+    def check_secure(self) -> str:
+        return "http" if self.args.secure_off else "https"
 
 
 if __name__ == "__main__":
