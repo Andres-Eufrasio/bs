@@ -191,7 +191,7 @@
 
   "youtube": "https://www.youtube.com/results?search_query=",
   "yt": "https://www.youtube.com/results?search_query=",
-  "netflix": "https://www.netflix.com/search?q",
+  "netflix": "https://www.netflix.com/search?q=",
   "vimeo": "https://vimeo.com/search?q=",
   "dailymotion": "https://www.dailymotion.com/search/",
   "bilibili": "https://search.bilibili.com/all?keyword=",
