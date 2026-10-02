@@ -2,7 +2,7 @@ import argparse
 import json
 import webbrowser
 from urllib.parse import quote
-
+import sys
 import tomllib as tom
 
 parser = argparse.ArgumentParser(description="Easy search from your terminal")
@@ -14,6 +14,13 @@ with open("./bsconfig.toml", "rb") as f:
 parser.add_argument(
     "search",
     help="Search query or URL",
+)
+
+parser.add_argument(
+    "engine",
+    help="Select a search engine",
+    default=default_args.get("engine", "google"),
+    type=str.lower,
 )
 
 parser.add_argument(
@@ -97,8 +104,11 @@ class Search:
         # Search engine
         with open("./resources/engines.json", "r") as engines_json:
             engines = json.load(engines_json)
-
-        engine_url = engines[self.args.engine]
+        try:
+            engine_url = engines[self.args.engine]
+        except:
+            print("Error engine not in engine.json\nthis is not an included engine, please add your own using bsconfig.toml")
+            sys.exit()
 
         self.search_string = engine_url + quote(self.args.search)
 
