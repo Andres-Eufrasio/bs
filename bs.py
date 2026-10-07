@@ -6,18 +6,28 @@ import sys
 import tomllib as tom
 
 parser = argparse.ArgumentParser(description="Easy search from your terminal")
+subparser = parser.add_subparsers(dest = "command", help="Subcommad help")
 
 
-with open("./bsconfig.toml", "rb") as f:
-    default_args = tom.load(f)
+try:
+    with open("./bsconfig.toml", "rb") as f:
+        default_args = tom.load(f)
+except FileNotFoundError:
+    print("Error: bsconfig.toml not found. Create it first.")
+    sys.exit(1)
+
+
 
 parser.add_argument(
     "search",
+    # nargs is needed here otherwise it breaks the subparser?
+    nargs='?',
     help="Search query or URL",
 )
 
 parser.add_argument(
     "engine",
+    nargs='?',
     help="Select a search engine",
     default=default_args.get("engine", "google"),
     type=str.lower,
@@ -30,13 +40,13 @@ parser.add_argument(
     help="Search localhost on the specified port\n use / for empty search",
 )
 
-parser.add_argument(
-    "-e",
-    "--engine",
-    default=default_args.get("engine", "google"),
-    help="Select a search engine",
-    type=str.lower,
-)
+# parser.add_argument(
+#     "-e",
+#     "--engine",
+#     default=default_args.get("engine", "google"),
+#     help="Select a search engine",
+#     type=str.lower,
+# )
 
 parser.add_argument(
     "-b",
@@ -58,6 +68,19 @@ parser.add_argument(
     "--url",
     action="store_true",
     help="Treat the search argument as a URL",
+)
+
+parser_config = subparser.add_parser("set_config")
+
+parser_config.add_argument(
+    "flag",
+    help = "select the flag default you'd wish to change"
+)
+
+parser_config.add_argument(
+    "value",
+    help = "select the value you want to change it to"
+
 )
 
 
@@ -106,7 +129,8 @@ class Search:
             engines = json.load(engines_json)
         try:
             engine_url = engines[self.args.engine]
-        except:
+        except KeyError:
+
             print("Error engine not in engine.json\nthis is not an included engine, please add your own using bsconfig.toml")
             sys.exit()
 
