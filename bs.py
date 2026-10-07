@@ -1,16 +1,35 @@
 import argparse
 import json
+import os
+import sys
 import webbrowser
 from urllib.parse import quote
-import sys
+
+import tomli_w as tomw
 import tomllib as tom
 
+
+""" TODO
+Make it so engine can be both positional and flag based
+Have auto browser searching for non listed browsers, and auto add them to the list if found
+"""
+
+if os.name == "nt": 
+    appdata_path = os.environ['APPDATA']
+    folder_path = appdata_path + r"/bs"
+if os.name == "posix":
+    config_path = r"~/.config/nvim"
+    folder_path = appdata_path + r"/bs"
+else:
+    print(f"operating system {os.name} not supported")
+    sys.exit(1)
+
 parser = argparse.ArgumentParser(description="Easy search from your terminal")
-subparser = parser.add_subparsers(dest = "command", help="Subcommad help")
+subparser = parser.add_subparsers(dest = "cmd", help="Subcommad help")
 
 
 try:
-    with open("./bsconfig.toml", "rb") as f:
+    with open(folder_path+"/bsconfig.toml", "rb") as f:
         default_args = tom.load(f)
 except FileNotFoundError:
     print("Error: bsconfig.toml not found. Create it first.")
@@ -90,8 +109,21 @@ args = parser.parse_args()
 class Search:
     def __init__(self, args):
         self.args = args
-        self.search_string = ""
-        self.build_search()
+        print(args.cmd)
+
+        if args.cmd == "set_config":
+            self.change_config()
+
+        else:
+            self.search_string = ""
+            self.build_search()
+
+    def change_config(self):
+        if args.flag in ("-e"  "engine"  "--engine"):
+           print("huzzah")
+
+
+
 
     def build_search(self):
         if self.args.url:
